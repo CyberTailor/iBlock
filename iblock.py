@@ -19,8 +19,8 @@
 Blocking Apple IDs
 """
 __author__ = 'CyberTailor <cybertailor@gmail.com>'
-__version__ = "0.5"
-v_number = 1
+__version__ = "0.5.1"
+v_number = 2
 
 import argparse
 import tempfile
@@ -31,6 +31,7 @@ import configparser
 import gettext
 import re
 import time
+from timeout_decorator import timeout_decorator
 from getpass import getpass
 from email.utils import parseaddr
 from urllib import request
@@ -151,13 +152,14 @@ def call_api(method, params, token):
     params.append(("access_token", token))
     params.append(("v", "5.33"))
     url = "https://api.vk.com/method/{}?{}".format(method, urlencode(params))
-    result = json.loads(request.urlopen(url).read().decode("utf-8"))
+    result = json.loads(request.urlopen(url, timeout=3.0).read().decode("utf-8"))
     if "error" in result:
         print(result["error"]["error_msg"])
     time.sleep(0.3)
     return result["response"]
 
 
+@timeout_decorator.timeout(12)
 def block(apple_id):
     """
     Blocking Apple ID
@@ -172,12 +174,13 @@ def block(apple_id):
                'Content-Type': 'text/plist', 'Content-length': str(len(xml_send))}
     req = request.Request(url, data=bytes(xml_send, encoding="utf-8"), headers=headers, method="POST")
     while True:
-        xml_resp = request.urlopen(req, timeout=15).read().decode("utf-8")
+        xml_resp = request.urlopen(req, timeout=3.0).read().decode("utf-8")
         xml_data = parse(xml_resp)
         status = xml_data["plist"]["dict"]["string"]
         if status == 'This Apple ID has been disabled for security reasons.':
             print(_("Apple ID <{}> has blocked!").format(apple_id))
             break
+        time.sleep(0.5)
 
 
 def check_content(data):
@@ -189,8 +192,11 @@ def check_content(data):
         text = post["text"]
         for rich_line in text.splitlines():
             email = parseaddr(rich_line)[-1]
-            if re.match(r"[^@]+@[^@]+\.[^@]+", email) and not email.count(" "):
-                block(email)
+            if re.match(r"[^@]+@[^@]+\.[^@]+", email) and not email.count(" ") and not email.startswith("#"):
+                try:
+                    block(email)
+                except timeout_decorator.TimeoutError:
+                    print(_("<{}> isn't blocked (timeout)").format(email))
 
 
 def scan(group_id):
@@ -199,7 +205,11 @@ def scan(group_id):
     :param group_id: group to look for Apple IDs
     """
     group_name = call_api(method="groups.getById", params=[("group_id", group_id)], token=access_token)[0]["name"]
+    for i in range(os.get_terminal_size()[0]):
+        print("=", end="")
     print(_("Scanning {}...").format(group_name))
+    for i in range(os.get_terminal_size()[0]):
+        print("=", end="")
 
     cycles = args["posts"] // 100
     out = args["posts"] % 100
@@ -245,7 +255,10 @@ if __name__ == "__main__":
             scan(group_id=gid)
 
         for gayple_id in id_list:
-            block(gayple_id)
+            try:
+                block(gayple_id)
+            except timeout_decorator.TimeoutError:
+                print(_("<{}> isn't blocked (timeout)").format(gayple_id))
 
         for i in range(os.get_terminal_size()[0]):
             print("-", end="")

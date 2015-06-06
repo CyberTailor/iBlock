@@ -62,3 +62,6 @@ msgstr "Apple ID <{}> заблокирован!"
 
 msgid "Scanning {}..."
 msgstr "Сканирую {}..."
+
+msgid "<{}> isn't blocked (timeout)"
+msgstr "<{}> не заблокирован (время истекло)"

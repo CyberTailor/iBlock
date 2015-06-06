@@ -40,8 +40,9 @@ Specify groups where the program will look for Apple IDs *(separated by comma)*.
 For example: `... -I example@mail.com,cock@icloud.com`
 
 ##Configuration file
-**See `iBlock_README.ini` for commentaries to configuration.**
+*See* `iBlock_README.ini` *for commentaries to configuration.*
 
 ##Used libraries
 * [xmltodict](https://github.com/martinblech/xmltodict)
 * [vk_api_auth](https://github.com/dzhioev/vk_api_auth)
+* [timeout-decorator](https://github.com/pnpnpn/timeout-decorator)

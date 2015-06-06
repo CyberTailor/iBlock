@@ -1,0 +1,64 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+
+msgid "Blocking Apple ID.\nSee 'iBlock.ini' for settings."
+msgstr "Блокировка Apple ID.\nСмотрите 'iBlock.ini' для настройки."
+
+msgid "specify groups where the program will look for Apple IDs (by comma)"
+msgstr "указать группы, где программа будет искать Apple ID (через запятую)"
+
+msgid "specify Apple IDs which the program will block (by comma)"
+msgstr "указать Apple ID, которые программа будет блокировать (через запятую)"
+
+msgid "get access to vk.com"
+msgstr "получить доступ к ВКонтакте"
+
+msgid "If you're afraid for losing your account, then look for alternate method in 'iBlock.ini'"
+msgstr "Если вы боитесь потерять аккаунт, посмотрите альтернативный способ в файле 'iBlock.ini'"
+
+msgid "Your login: "
+msgstr "Ваш логин: "
+
+msgid "Your password: "
+msgstr "Ваш пароль: "
+
+msgid "check for updates"
+msgstr "проверить наличие обновлений"
+
+msgid "set scan interval (in minutes) [3]"
+msgstr "задать интервал сканирования (в минутах) [3]"
+
+msgid "Found update to version {}!\n\nChangelog:"
+msgstr "Найдено обновление до версии {}!\n\nСписок изменений:"
+
+msgid "set posts limit for scanning [50]"
+msgstr "задать количество постов для сканирования [50]"
+
+msgid "Creating temporary directory..."
+msgstr "Создаю временную папку..."
+
+msgid "Downloading new version..."
+msgstr "Скачиваю новую версию..."
+
+msgid "Unpacking archive..."
+msgstr "Распаковываю архив..."
+
+msgid "Exiting..."
+msgstr "Завершаю работу приложения..."
+
+msgid "\nUpgrade? (Y/n)"
+msgstr "\nОбновиться? (Д/н)"
+
+msgid "Passing update...\n"
+msgstr "Ладно, хрен с ней, обновкой...\n"
+
+msgid "You running latest version\n"
+msgstr "Вы используете последнюю версию\n"
+
+msgid "Apple ID <{}> has blocked!"
+msgstr "Apple ID <{}> заблокирован!"
+
+msgid "Scanning {}..."
+msgstr "Сканирую {}..."

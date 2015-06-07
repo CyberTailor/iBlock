@@ -19,26 +19,29 @@
 Blocking Apple IDs
 """
 __author__ = 'CyberTailor <cybertailor@gmail.com>'
-__version__ = "0.5.1"
-v_number = 2
+__version__ = "0.5.2"
+v_number = 3
 
+import os
 import argparse
 import tempfile
 import zipfile
-import os
 import json
 import configparser
 import gettext
 import re
 import time
+
 from timeout_decorator import timeout_decorator
+from vk_api_auth.vk_auth import auth
+from xmltodict.xmltodict import parse
+
 from getpass import getpass
 from email.utils import parseaddr
 from urllib import request
 from urllib.parse import urlencode
-from vk_api_auth.vk_auth import auth
-from xmltodict.xmltodict import parse
 
+email_re = re.compile(r"[a-zA-Z0-9.]*@[a-zA-Z0-9]*[.][a-zA-Z.]*")
 scriptdir = os.path.abspath(os.path.dirname(__file__))
 gettext.install("iblock", "{}/locale".format(scriptdir))
 
@@ -82,7 +85,7 @@ def parse_conf():
     return parsed_conf
 
 
-def upgrade():
+def upgrade(version):
     """
     Upgrading program
     """
@@ -91,7 +94,7 @@ def upgrade():
     os.mkdir(tmpdir)
     print(_("Downloading new version..."))
     archive_file = "{}/iBlock.zip".format(tmpdir)
-    request.urlretrieve("http://net2ftp.ru/node0/CyberTailor@gmail.com/iblock.zip",
+    request.urlretrieve("https://github.com/CyberTailor/iBlock/releases/download/{0}/iBlock-{0}.zip".format(version),
                         filename=archive_file)
     print(_("Unpacking archive..."))
     archive = zipfile.ZipFile(archive_file)
@@ -114,7 +117,7 @@ def upd_check():
         choice = input(_("\nUpgrade? (Y/n)")).lower()
         update_prompt = {"n": False, "not": False, "н": False, "нет": False}.get(choice, True)
         if update_prompt:
-            upgrade()
+            upgrade(version=latest["version"])
         else:
             print(_("Passing update...\n"))
     else:
@@ -152,14 +155,15 @@ def call_api(method, params, token):
     params.append(("access_token", token))
     params.append(("v", "5.33"))
     url = "https://api.vk.com/method/{}?{}".format(method, urlencode(params))
-    result = json.loads(request.urlopen(url, timeout=3.0).read().decode("utf-8"))
+    result = json.loads(request.urlopen(url, timeout=5.0).read().decode("utf-8"))
     if "error" in result:
-        print(result["error"]["error_msg"])
+        print("VK API:", result["error"]["error_msg"])
+        print()
     time.sleep(0.3)
     return result["response"]
 
 
-@timeout_decorator.timeout(12)
+@timeout_decorator.timeout(10)
 def block(apple_id):
     """
     Blocking Apple ID
@@ -174,13 +178,12 @@ def block(apple_id):
                'Content-Type': 'text/plist', 'Content-length': str(len(xml_send))}
     req = request.Request(url, data=bytes(xml_send, encoding="utf-8"), headers=headers, method="POST")
     while True:
-        xml_resp = request.urlopen(req, timeout=3.0).read().decode("utf-8")
+        xml_resp = request.urlopen(req, timeout=5.0).read().decode("utf-8")
         xml_data = parse(xml_resp)
         status = xml_data["plist"]["dict"]["string"]
         if status == 'This Apple ID has been disabled for security reasons.':
             print(_("Apple ID <{}> has blocked!").format(apple_id))
             break
-        time.sleep(0.5)
 
 
 def check_content(data):
@@ -191,12 +194,14 @@ def check_content(data):
     for post in data:
         text = post["text"]
         for rich_line in text.splitlines():
-            email = parseaddr(rich_line)[-1]
-            if re.match(r"[^@]+@[^@]+\.[^@]+", email) and not email.count(" ") and not email.startswith("#"):
+            matched = email_re.search(rich_line)
+            if matched:
+                span = matched.span()
+                apple_id = rich_line[span[0]:span[1]]
                 try:
-                    block(email)
+                    block(apple_id)
                 except timeout_decorator.TimeoutError:
-                    print(_("<{}> isn't blocked (timeout)").format(email))
+                    print(_("<{}> isn't blocked (timeout)").format(apple_id))
 
 
 def scan(group_id):

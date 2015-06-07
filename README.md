@@ -2,7 +2,7 @@
 If you use Linux, then you'll get translations!
 
 ##Requirements
-* Python >=3.2
+* Python >=3.3
 
 ##Usage
 `./iblock.py [opts]`
